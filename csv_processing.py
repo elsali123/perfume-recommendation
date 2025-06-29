@@ -1,7 +1,7 @@
 import csv
 import json
 import sys
-
+import subprocess
 csv.field_size_limit(sys.maxsize)
 
 with open('perfumes_table.csv', 'r') as file:
@@ -36,6 +36,23 @@ with open('perfumes_table.csv', 'r') as file:
             #data[row['title']] = [row['description'], row['notes'], row['designer'], [row['reviews']]]
         else:
             data[row[6]]["reviews"].append(review) #data[row['title']][3].append(row['reviews'])
+    
+    for key in data:
+        if data[key]["reviews"] != "":
+
+            model = 'llama3'
+            
+            reviews = data[key]["reviews"]
+            prompt = f"Create a one sentence summary of these customer reviews: {reviews}"
+            
+            
+            result = subprocess.run(
+                ["ollama", "run", model],
+                input=prompt,
+                capture_output=True,
+                text=True
+            )
+            print(result.stdout.strip())
     
     with open('data.json', 'w') as f:
         json.dump(data, f, indent = 4)
